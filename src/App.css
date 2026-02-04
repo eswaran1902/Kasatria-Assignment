@@ -1,0 +1,139 @@
+.page{
+  height:100vh;
+  width:100vw;
+  overflow:hidden;
+  background:#000;
+  font-family: system-ui, Arial;
+}
+
+.mount{
+  position:absolute;
+  inset:0;
+}
+
+.menu{
+  position:absolute;
+  bottom:20px;
+  left:0;
+  right:0;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  z-index:999;
+}
+
+.menu button{
+  color:#fff;
+  background: rgba(0,127,127,0.35);
+  outline: 1px solid rgba(0,127,127,0.5);
+  border:0;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:700;
+}
+.menu button:hover{ background: rgba(0,127,127,0.55); }
+
+.loginOverlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:10;
+  background: radial-gradient(circle at 30% 20%, rgba(40,40,40,.8), rgba(0,0,0,.95));
+}
+
+.loginCard{
+  width:min(560px, 92vw);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  padding: 28px;
+  text-align:center;
+  color:#fff;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+}
+
+.loginCard h1{ margin:0 0 10px; font-size:28px; font-weight:800; }
+.loginCard p{ margin:0 0 18px; opacity:.85; line-height:1.4; }
+
+.oauthBtn{
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.2);
+  background: rgba(255,255,255,.10);
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+}
+.oauthBtn:hover{ background: rgba(255,255,255,.18); }
+
+.err{
+  margin-top: 12px;
+  color: #ffb3b3;
+  font-size: 13px;
+}
+
+/* Tile */
+.element {
+  width: 120px;
+  height: 160px;
+  box-shadow: 0px 0px 12px rgba(0,255,255,0.2);
+  border: 1px solid rgba(127,255,255,0.25);
+  border-radius: 12px;
+  text-align: center;
+  cursor: default;
+  overflow: hidden;
+  position: relative;
+}
+
+.element .photo{
+  width: 60px;
+  height: 60px;
+  border-radius: 999px;
+  object-fit: cover;
+  margin-top: 10px;
+  border: 2px solid rgba(255,255,255,.45);
+  background: rgba(255,255,255,.1);
+}
+
+.element .name{
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 0 8px;
+  color: rgba(255,255,255,.95);
+  line-height: 1.2;
+  height: 30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.element .meta{
+  font-size: 10px;
+  color: rgba(255,255,255,.85);
+  line-height: 1.35;
+  padding: 0 8px;
+}
+
+.element .worth{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:8px;
+  font-size: 10px;
+  font-weight: 900;
+  color: rgba(0,0,0,.75);
+  margin: 0 10px;
+  border-radius: 999px;
+  padding: 4px 6px;
+  background: rgba(255,255,255,.7);
+}
+
+.element,
+.element * {
+  pointer-events: none;
+}
