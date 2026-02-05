@@ -96,7 +96,7 @@ export default function App() {
   const rafRef = useRef(null);
 
   const objectsRef = useRef([]);
-  const targetsRef = useRef({ table: [], sphere: [], helix: [], grid: [] });
+  const targetsRef = useRef({ table: [], sphere: [], helix: [], grid: [], pyramid: [] });
 
   // ---------- Google Login ----------
   useEffect(() => {
@@ -189,7 +189,7 @@ export default function App() {
     }
 
     objectsRef.current = [];
-    targetsRef.current = { table: [], sphere: [], helix: [], grid: [] };
+    targetsRef.current = { table: [], sphere: [], helix: [], grid: [], pyramid: [] };
     cameraRef.current = null;
     sceneRef.current = null;
     rendererRef.current = null;
@@ -198,7 +198,7 @@ export default function App() {
 
   // ---------- Layout targets ----------
   const computeTargets = (count) => {
-    const targets = { table: [], sphere: [], helix: [], grid: [] };
+    const targets = { table: [], sphere: [], helix: [], grid: [], pyramid: [] };
 
     // TABLE
     const cols = 20;
@@ -271,6 +271,110 @@ export default function App() {
       );
       targets.grid.push(o);
     }
+
+    // ---------------- PYRAMID / TETRAHEDRON (CLEAN, FILLED FACES) ----------------
+  const R = 950;          // size
+  const pushOut = 10;     // push cards off face so they don't z-fight
+  const margin = 0.05;    // 0..0.33 (bigger = more away from edges)
+
+  // Regular tetrahedron vertices centered at origin
+  const V = [
+    new THREE.Vector3( 1,  1,  1),
+    new THREE.Vector3(-1, -1,  1),
+    new THREE.Vector3(-1,  1, -1),
+    new THREE.Vector3( 1, -1, -1),
+  ].map(v => v.normalize().multiplyScalar(R));
+
+  const faces = [
+    [0, 1, 2],
+    [0, 3, 1],
+    [0, 2, 3],
+    [1, 3, 2],
+  ];
+
+  // how many cards per face (balanced)
+  const basePerFace = Math.floor(count / 4);
+  let remainder = count % 4;
+
+  const centroid = new THREE.Vector3(0, 0, 0);
+
+  // helper: generate enough interior points for 1 face
+  function generateFacePoints(A, B, C, need) {
+    // face normal
+    const normal = new THREE.Vector3()
+      .subVectors(B, A)
+      .cross(new THREE.Vector3().subVectors(C, A))
+      .normalize();
+
+    // make normal point OUTWARD (away from origin)
+    const faceCenter = new THREE.Vector3().addVectors(A, B).add(C).multiplyScalar(1 / 3);
+    if (normal.dot(faceCenter.clone().sub(centroid)) < 0) normal.multiplyScalar(-1);
+
+    // choose grid density until we have >= need points
+    let n = 2;
+    const pts = [];
+    while (pts.length < need) {
+      pts.length = 0;
+
+      for (let i = 0; i <= n; i++) {
+        for (let j = 0; j <= n - i; j++) {
+          const u = i / n;
+          const v = j / n;
+          const w = 1 - u - v;
+
+          // margin away from edges: u,v,w all >= margin
+          if (u < margin || v < margin || w < margin) continue;
+
+          const p = new THREE.Vector3()
+            .addScaledVector(A, w)
+            .addScaledVector(B, u)
+            .addScaledVector(C, v)
+            .addScaledVector(normal, pushOut);
+
+          pts.push({ p, normal });
+        }
+      }
+
+      n++;
+      if (n > 60) break; // safety
+    }
+
+    // pick evenly spaced subset (no clumping)
+    if (pts.length > need) {
+      const out = [];
+      for (let k = 0; k < need; k++) {
+        const idx = Math.floor((k / need) * pts.length);
+        out.push(pts[idx]);
+      }
+      return out;
+    }
+    return pts.slice(0, need);
+  }
+
+  // build targets.pyramid
+  for (let f = 0; f < faces.length; f++) {
+    const need = basePerFace + (remainder > 0 ? 1 : 0);
+    if (remainder > 0) remainder--;
+
+    const [ia, ib, ic] = faces[f];
+    const A = V[ia], B = V[ib], C = V[ic];
+
+    const pts = generateFacePoints(A, B, C, need);
+
+    for (const { p, normal } of pts) {
+      const o = new THREE.Object3D();
+      o.position.copy(p);
+
+      // face outward
+      const look = new THREE.Vector3().copy(p).add(normal);
+      o.lookAt(look);
+
+      targets.pyramid.push(o);
+    }
+  }
+
+  // Final safety: exactly count targets
+  targets.pyramid = targets.pyramid.slice(0, count);
 
     targetsRef.current = targets;
   };
@@ -395,6 +499,7 @@ useEffect(() => {
           <button onClick={() => transform(targetsRef.current.sphere)}>SPHERE</button>
           <button onClick={() => transform(targetsRef.current.helix)}>HELIX</button>
           <button onClick={() => transform(targetsRef.current.grid)}>GRID</button>
+          <button onClick={() => transform(targetsRef.current.pyramid)}>PYRAMID</button>
         </div>
       )}
     </div>
